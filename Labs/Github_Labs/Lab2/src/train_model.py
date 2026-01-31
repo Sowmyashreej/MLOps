@@ -1,28 +1,26 @@
-import pandas as pd
+import os
+import joblib
 from sklearn.datasets import load_wine
-from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split
 
-# 1. Load the Wine dataset (Modification 1)
+# 1. Load Wine dataset (Modification for Lab Requirement)
 data = load_wine()
-X = pd.DataFrame(data.data, columns=data.feature_names)
-y = data.target
+X_train, X_test, y_train, y_test = train_test_split(data.data, data.target, test_size=0.2)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# 2. Use Random Forest (Modification 2)
-model = RandomForestClassifier(n_estimators=50, max_depth=5)
+# 2. Train Random Forest (High accuracy to pass threshold)
+model = RandomForestClassifier(n_estimators=100)
 model.fit(X_train, y_train)
 
-# 3. Generate a Report
-predictions = model.predict(X_test)
-report = classification_report(y_test, predictions)
+# 3. FIX: Save model to the specific 'models' folder Lab 2 expects
+# This path moves up from 'src' to the 'Lab2' root, then into 'models'
+script_dir = os.path.dirname(__file__)
+model_path = os.path.join(script_dir, '..', 'models', 'latest_model.pkl')
 
-print("--- Model Performance Report ---")
-print(report)
+# Ensure directory exists
+os.makedirs(os.path.dirname(model_path), exist_ok=True)
 
-# 4. Save metrics to a file (Modification 3)
-with open("results.txt", "w") as f:
-    f.write(report)
+# Save the model
+joblib.dump(model, model_path)
+print(f"Model saved at: {model_path}")
 
